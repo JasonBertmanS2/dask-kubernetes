@@ -52,7 +52,7 @@ class Pod(ProcessInterface):
         pod_template,
         namespace,
         loop=None,
-        **kwargs
+        **kwargs,
     ):
         self._pod = None
         self.cluster = cluster
@@ -197,6 +197,12 @@ class Scheduler(Pod):
             namespace=self.namespace,
             port=SCHEDULER_PORT,
         )
+        # Introduce a small delay to let DNS propagate
+        print(f"[J-DEBUG] Address - {self.address}")
+        print(
+            f"[J-DEBUG] Service - {self.service.metadata.name}.{self.service.metadata.namespace}"
+        )
+        await asyncio.sleep(5)
         self.external_address = await get_external_address_for_scheduler_service(
             self.core_api, self.service
         )
@@ -415,7 +421,7 @@ class KubeCluster(SpecCluster):
         security=None,
         scheduler_service_wait_timeout=None,
         scheduler_pod_template=None,
-        **kwargs
+        **kwargs,
     ):
         if isinstance(pod_template, str):
             with open(pod_template) as f:
